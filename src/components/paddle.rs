@@ -31,7 +31,8 @@ impl Paddle {
             .unwrap();
     }
 
-    pub fn move_paddle(&mut self, amount: i32) {
+    pub fn move_paddle(&mut self, amount: i32, window_height: i32) {
         self.y += amount;
+        self.y = self.y.clamp(0, window_height - self.height as i32);
     }
 }

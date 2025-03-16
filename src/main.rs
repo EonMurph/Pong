@@ -52,20 +52,23 @@ fn main() {
                 _ => {}
             }
         }
-         
-        let keyboard_state = event_pump.keyboard_state();
-        // Process movement keys
-        if keyboard_state.is_scancode_pressed(Scancode::W) {
-            paddle1.move_paddle(-paddle1.vel);
-        }
-        if keyboard_state.is_scancode_pressed(Scancode::Up) {
-            paddle2.move_paddle(-paddle2.vel);
-        }
-        if keyboard_state.is_scancode_pressed(Scancode::E) {
-            paddle1.move_paddle(paddle1.vel);
-        }
-        if keyboard_state.is_scancode_pressed(Scancode::Down) {
-            paddle2.move_paddle(paddle2.vel);
+
+        {
+            let window_width = window.size().0 as i32;
+            let keyboard_state = event_pump.keyboard_state();
+            // Process movement keys
+            if keyboard_state.is_scancode_pressed(Scancode::W) {
+                paddle1.move_paddle(-paddle1.vel, window_width);
+            }
+            if keyboard_state.is_scancode_pressed(Scancode::Up) {
+                paddle2.move_paddle(-paddle2.vel, window_width);
+            }
+            if keyboard_state.is_scancode_pressed(Scancode::E) {
+                paddle1.move_paddle(paddle1.vel, window_width);
+            }
+            if keyboard_state.is_scancode_pressed(Scancode::Down) {
+                paddle2.move_paddle(paddle2.vel, window_width);
+            }
         }
 
         // Main game code
