@@ -5,7 +5,7 @@ use sdl2::video::Window;
 
 use super::paddle::Paddle;
 
-pub struct Circle {
+pub struct Ball {
     pub x: i32,
     pub y: i32,
     pub x_vel: i32,
@@ -14,7 +14,7 @@ pub struct Circle {
     pub color: Color,
 }
 
-impl Circle {
+impl Ball {
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
         canvas.set_draw_color(self.color);
 
@@ -52,9 +52,14 @@ impl Circle {
         let (width, height) = window.size();
 
         // Left and right wall collisions
-        if (self.x < 0) || (self.x + self.r as i32 > width as i32) {
+        if (self.x + self.r as i32) <= 0 {
             self.x_vel *= -1;
-            self.x = self.x.clamp(self.r as i32, width as i32 - self.r as i32);
+            self.x = width as i32 / 2;
+            self.y = height as i32 / 2;
+        } else if (self.x + self.r as i32) > width as i32 {
+            self.x_vel *= -1;
+            self.x = width as i32 / 2;
+            self.y = height as i32 / 2;
         }
         // Top and bottom wall collisions
         if (self.y < 0) || (self.y + self.r as i32 > height as i32) {
@@ -80,7 +85,6 @@ impl Circle {
                 self.x_vel *= -1;
                 self.y_vel += (self.y - (paddle.y + (paddle.height as i32 / 2))) / 10;
             }
-            
         }
     }
 

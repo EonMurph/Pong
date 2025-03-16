@@ -1,8 +1,8 @@
 mod components;
 
-use components::circle::Circle;
-use components::game::Game;
+use components::ball::Ball;
 use components::paddle::Paddle;
+use components::game::Game;
 
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, Scancode};
@@ -25,7 +25,7 @@ fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
 
     // Initialise circle
-    let mut circle = Circle {
+    let mut ball = Ball {
         x: 30,
         y: 100,
         x_vel: 8,
@@ -72,9 +72,9 @@ fn main() {
         }
 
         // Main game code
-        circle.check_colliding([&paddle1, &paddle2], &window);
-        circle.update();
-        circle.draw(&mut canvas);
+        ball.check_colliding([&paddle1, &paddle2], &window);
+        ball.update();
+        ball.draw(&mut canvas);
         paddle1.draw(&mut canvas);
         paddle2.draw(&mut canvas);
 

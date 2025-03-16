@@ -1,3 +1,3 @@
-pub mod circle;
-pub mod game;
+pub mod ball;
 pub mod paddle;
+pub mod game;
