@@ -1,8 +1,8 @@
 mod components;
 
 use components::ball::Ball;
-use components::paddle::Paddle;
 use components::game::Game;
+use components::paddle::Paddle;
 
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, Scancode};
@@ -35,6 +35,7 @@ fn main() {
     };
     let mut paddle1 = Paddle::new(10, 200);
     let mut paddle2 = Paddle::new((window.size().0 - 30) as i32, 200);
+    let mut game = Game::new(5);
 
     'running: loop {
         // Reset the canvas
@@ -72,12 +73,14 @@ fn main() {
         }
 
         // Main game code
-        ball.check_colliding([&paddle1, &paddle2], &window);
-        ball.update();
-        ball.draw(&mut canvas);
-        paddle1.draw(&mut canvas);
-        paddle2.draw(&mut canvas);
+        if !game.freeze {
+            ball.check_colliding([&paddle1, &paddle2], &mut game, &window);
+            ball.update();
+            ball.draw(&mut canvas);
+            paddle1.draw(&mut canvas);
+            paddle2.draw(&mut canvas);
 
-        canvas.present();
+            canvas.present();
+        }
     }
 }

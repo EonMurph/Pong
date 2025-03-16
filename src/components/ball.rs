@@ -3,6 +3,7 @@ use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+use super::game::Game;
 use super::paddle::Paddle;
 
 pub struct Ball {
@@ -48,18 +49,22 @@ impl Ball {
         }
     }
 
-    pub fn check_colliding(&mut self, paddles: [&Paddle; 2], window: &Window) {
+    pub fn check_colliding(&mut self, paddles: [&Paddle; 2], game: &mut Game, window: &Window) {
         let (width, height) = window.size();
 
         // Left and right wall collisions
         if (self.x + self.r as i32) <= 0 {
             self.x_vel *= -1;
+            self.y_vel = 5;
             self.x = width as i32 / 2;
             self.y = height as i32 / 2;
+            game.increase_score(2);
         } else if (self.x + self.r as i32) > width as i32 {
             self.x_vel *= -1;
+            self.y_vel = 3;
             self.x = width as i32 / 2;
             self.y = height as i32 / 2;
+            game.increase_score(1);
         }
         // Top and bottom wall collisions
         if (self.y < 0) || (self.y + self.r as i32 > height as i32) {
