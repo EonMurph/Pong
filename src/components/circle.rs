@@ -1,15 +1,17 @@
+use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
-use sdl2::pixels::Color;
+
+use super::paddle::Paddle;
 
 pub struct Circle {
-   pub x: i32,
-   pub y: i32,
-   pub x_vel: i32,
-   pub y_vel: i32,
-   pub r: u32,
-   pub color: Color,
+    pub x: i32,
+    pub y: i32,
+    pub x_vel: i32,
+    pub y_vel: i32,
+    pub r: u32,
+    pub color: Color,
 }
 
 impl Circle {
@@ -46,15 +48,39 @@ impl Circle {
         }
     }
 
-    pub fn check_colliding(&mut self, window: &Window) {
+    pub fn check_colliding(&mut self, paddles: [&Paddle; 2], window: &Window) {
         let (width, height) = window.size();
+
+        // Left and right wall collisions
         if (self.x < 0) || (self.x + self.r as i32 > width as i32) {
             self.x_vel *= -1;
             self.x = self.x.clamp(self.r as i32, width as i32 - self.r as i32);
         }
+        // Top and bottom wall collisions
         if (self.y < 0) || (self.y + self.r as i32 > height as i32) {
             self.y_vel *= -1;
             self.y = self.y.clamp(self.r as i32, width as i32 - self.r as i32);
+        }
+
+        for paddle in paddles.iter() {
+            // Get paddle boundaries
+            let left_side = paddle.x;
+            let right_side = paddle.x + paddle.width as i32;
+            let top_side = paddle.y;
+            let bottom_side = paddle.y + paddle.height as i32;
+
+            // Get approaching side
+            let closest_x = self.x.clamp(left_side, right_side);
+            let closest_y = self.y.clamp(top_side, bottom_side);
+
+            // Get distance from circle centre to closest paddle side
+            let distance = ((closest_x - self.x).pow(2) + (closest_y - self.y).pow(2)).isqrt();
+            // True if colliding
+            if distance <= self.r as i32 {
+                self.x_vel *= -1;
+                self.y_vel += (self.y - (paddle.y + (paddle.height as i32 / 2))) / 10;
+            }
+            
         }
     }
 

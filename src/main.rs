@@ -2,10 +2,10 @@ mod components;
 
 use components::circle::Circle;
 use components::game::Game;
-use components::paddle::{self, Paddle};
+use components::paddle::Paddle;
 
 use sdl2::event::Event;
-use sdl2::keyboard::{KeyboardState, Keycode, Scancode};
+use sdl2::keyboard::{Keycode, Scancode};
 use sdl2::pixels::Color;
 
 fn main() {
@@ -72,7 +72,7 @@ fn main() {
         }
 
         // Main game code
-        circle.check_colliding(&window);
+        circle.check_colliding([&paddle1, &paddle2], &window);
         circle.update();
         circle.draw(&mut canvas);
         paddle1.draw(&mut canvas);

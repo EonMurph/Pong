@@ -7,8 +7,8 @@ pub struct Paddle {
     pub x: i32,
     pub y: i32,
     pub vel: i32,
-    height: u32,
-    width: u32,
+    pub(crate) height: u32,
+    pub(crate) width: u32,
     color: Color,
 }
 
