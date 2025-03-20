@@ -1,3 +1,5 @@
+use super::paddle::Paddles;
+
 pub struct Game {
     p1_score: u8,
     p2_score: u8,
@@ -15,21 +17,20 @@ impl Game {
         }
     }
 
-    pub fn increase_score(&mut self, paddle: u8) {
+    pub fn increase_score(&mut self, paddle: Paddles) {
         match paddle {
-            1 => {
+            Paddles::Paddle1 => {
                 self.p1_score += 1;
                 if self.p1_score == self.winning_score {
                     self.game_over();
                 }
             }
-            2 => {
+            Paddles::Paddle2 => {
                 self.p2_score += 1;
                 if self.p2_score == self.winning_score {
                     self.game_over();
                 }
             }
-            _ => {}
         }
     }
 

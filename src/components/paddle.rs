@@ -3,6 +3,11 @@ use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+pub enum Paddles {
+    Paddle1,
+    Paddle2,
+}
+
 pub struct Paddle {
     pub x: i32,
     pub y: i32,
@@ -28,7 +33,7 @@ impl Paddle {
         canvas.set_draw_color(self.color);
         canvas
             .draw_rect(Rect::new(self.x, self.y, self.width, self.height))
-            .unwrap();
+            .expect("Couldn't draw paddle.");
     }
 
     pub fn move_paddle(&mut self, amount: i32, window_height: i32) {
