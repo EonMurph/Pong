@@ -10,22 +10,29 @@ use sdl2::pixels::Color;
 
 fn main() {
     // Create the sdl context
-    let sdl_context = sdl2::init().unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
+    let sdl_context: sdl2::Sdl = sdl2::init().expect("Couldn't initialise the sdl context.");
+    let video_subsystem: sdl2::VideoSubsystem = sdl_context
+        .video()
+        .expect("Couldn't initialise the VideoSubsystem.");
 
     // Create the window, canvas, and event monitor
-    let dim = 800;
-    let window = video_subsystem.window("Pong", dim, dim).build().unwrap();
-    let mut canvas = window
+    let dim: u32 = 800;
+    let window: sdl2::video::Window = video_subsystem
+        .window("Pong", dim, dim)
+        .build()
+        .expect("Couldn't initialise the window.");
+    let mut canvas: sdl2::render::Canvas<sdl2::video::Window> = window
         .clone()
         .into_canvas()
         .present_vsync()
         .build()
-        .unwrap();
-    let mut event_pump = sdl_context.event_pump().unwrap();
+        .expect("Couldn't initialise the canvas.");
+    let mut event_pump: sdl2::EventPump = sdl_context
+        .event_pump()
+        .expect("Couldn't initialise the EventPump.");
 
     // Initialise circle
-    let mut ball = Ball {
+    let mut ball: Ball = Ball {
         x: 30,
         y: 100,
         x_vel: 8,
@@ -33,9 +40,9 @@ fn main() {
         r: 12,
         color: Color::WHITE,
     };
-    let mut paddle1 = Paddle::new(10, 200);
-    let mut paddle2 = Paddle::new((window.size().0 - 30) as i32, 200);
-    let mut game = Game::new(5);
+    let mut paddle1: Paddle = Paddle::new(10, 200);
+    let mut paddle2: Paddle = Paddle::new((window.size().0 - 30) as i32, 200);
+    let mut game: Game = Game::new(5);
 
     'running: loop {
         // Reset the canvas
@@ -55,20 +62,20 @@ fn main() {
         }
 
         {
-            let window_width = window.size().0 as i32;
-            let keyboard_state = event_pump.keyboard_state();
+            let window_height: i32 = window.size().1 as i32;
+            let keyboard_state: sdl2::keyboard::KeyboardState<'_> = event_pump.keyboard_state();
             // Process movement keys
             if keyboard_state.is_scancode_pressed(Scancode::W) {
-                paddle1.move_paddle(-paddle1.vel, window_width);
+                paddle1.move_paddle(-paddle1.vel, window_height);
             }
             if keyboard_state.is_scancode_pressed(Scancode::Up) {
-                paddle2.move_paddle(-paddle2.vel, window_width);
+                paddle2.move_paddle(-paddle2.vel, window_height);
             }
             if keyboard_state.is_scancode_pressed(Scancode::E) {
-                paddle1.move_paddle(paddle1.vel, window_width);
+                paddle1.move_paddle(paddle1.vel, window_height);
             }
             if keyboard_state.is_scancode_pressed(Scancode::Down) {
-                paddle2.move_paddle(paddle2.vel, window_width);
+                paddle2.move_paddle(paddle2.vel, window_height);
             }
         }
 
