@@ -95,7 +95,7 @@ impl Ball {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn update_movement(&mut self) {
         self.x += self.x_vel;
         self.y += self.y_vel;
     }

@@ -9,7 +9,7 @@ use components::paddle::Paddle;
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, Scancode};
 use sdl2::pixels::Color;
-use sdl2::ttf::{Font, FontStyle, Sdl2TtfContext};
+use sdl2::ttf::Sdl2TtfContext;
 
 fn main() {
     // Create the sdl and ttf context
@@ -31,10 +31,10 @@ fn main() {
         .event_pump()
         .expect("Couldn't initialise the EventPump.");
 
-    // Load the font
+    // Load the font path
     let font_path: &Path = Path::new("res/PixelifySans-Bold.ttf");
 
-    // Initialise circle
+    // Initialise the ball, paddles, and game structs
     let mut ball: Ball = Ball {
         x: 30,
         y: 100,
@@ -96,10 +96,12 @@ fn main() {
                 }
             }
 
+            // Handle ball movement
             ball.check_colliding([&paddle1, &paddle2], &mut game, &window);
-            ball.update();
+            ball.update_movement();
         }
 
+        // Render the game
         game.render(&ball, &paddle1, &paddle2, window_size)
     }
 }
