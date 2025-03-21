@@ -1,5 +1,7 @@
 mod components;
 
+use std::path::Path;
+
 use components::ball::Ball;
 use components::game::Game;
 use components::paddle::Paddle;
@@ -7,10 +9,13 @@ use components::paddle::Paddle;
 use sdl2::event::Event;
 use sdl2::keyboard::{Keycode, Scancode};
 use sdl2::pixels::Color;
+use sdl2::ttf::{Font, FontStyle, Sdl2TtfContext};
 
 fn main() {
-    // Create the sdl context
+    // Create the sdl and ttf context
     let sdl_context: sdl2::Sdl = sdl2::init().expect("Couldn't initialise the sdl context.");
+    let sdl_ttf_context: Sdl2TtfContext =
+        sdl2::ttf::init().expect("Couldn't initialise the sdl ttf context.");
     let video_subsystem: sdl2::VideoSubsystem = sdl_context
         .video()
         .expect("Couldn't initialise the VideoSubsystem.");
@@ -21,7 +26,8 @@ fn main() {
         .window("Pong", dim, dim)
         .build()
         .expect("Couldn't initialise the window.");
-    let mut canvas: sdl2::render::Canvas<sdl2::video::Window> = window
+    let window_size: (i32, i32) = (window.size().0 as i32, window.size().1 as i32);
+    let mut canvas: sdl2::render::WindowCanvas = window
         .clone()
         .into_canvas()
         .present_vsync()
@@ -30,6 +36,15 @@ fn main() {
     let mut event_pump: sdl2::EventPump = sdl_context
         .event_pump()
         .expect("Couldn't initialise the EventPump.");
+
+    // Load the font
+    let font_path: &Path = Path::new("res/PixelifySans-Bold.ttf");
+    let mut font: Font = sdl_ttf_context
+        .load_font(font_path, 40)
+        .expect("Couldn't initialise the font.");
+    font.set_style(FontStyle::BOLD);
+    let texture_creator: sdl2::render::TextureCreator<sdl2::video::WindowContext> =
+        canvas.texture_creator();
 
     // Initialise circle
     let mut ball: Ball = Ball {
@@ -61,33 +76,33 @@ fn main() {
             }
         }
 
-        {
-            let window_height: i32 = window.size().1 as i32;
-            let keyboard_state: sdl2::keyboard::KeyboardState<'_> = event_pump.keyboard_state();
-            // Process movement keys
-            if keyboard_state.is_scancode_pressed(Scancode::W) {
-                paddle1.move_paddle(-paddle1.vel, window_height);
-            }
-            if keyboard_state.is_scancode_pressed(Scancode::Up) {
-                paddle2.move_paddle(-paddle2.vel, window_height);
-            }
-            if keyboard_state.is_scancode_pressed(Scancode::E) {
-                paddle1.move_paddle(paddle1.vel, window_height);
-            }
-            if keyboard_state.is_scancode_pressed(Scancode::Down) {
-                paddle2.move_paddle(paddle2.vel, window_height);
-            }
-        }
-
         // Main game code
-        if !game.freeze {
+        if !game.over {
+            // Handle Paddle Movement
+            {
+                let window_height: i32 = window.size().1 as i32;
+                let keyboard_state: sdl2::keyboard::KeyboardState<'_> = event_pump.keyboard_state();
+                // Process movement keys
+                if keyboard_state.is_scancode_pressed(Scancode::W) {
+                    paddle1.move_paddle(-paddle1.vel, window_height);
+                }
+                if keyboard_state.is_scancode_pressed(Scancode::Up) {
+                    paddle2.move_paddle(-paddle2.vel, window_height);
+                }
+                if keyboard_state.is_scancode_pressed(Scancode::E) {
+                    paddle1.move_paddle(paddle1.vel, window_height);
+                }
+                if keyboard_state.is_scancode_pressed(Scancode::Down) {
+                    paddle2.move_paddle(paddle2.vel, window_height);
+                }
+            }
+
             ball.check_colliding([&paddle1, &paddle2], &mut game, &window);
             ball.update();
-            ball.draw(&mut canvas);
-            paddle1.draw(&mut canvas);
-            paddle2.draw(&mut canvas);
-
-            canvas.present();
         }
+        
+        game.render(
+            &mut canvas, &ball, &paddle1, &paddle2, &font, &texture_creator, window_size
+        )
     }
 }
