@@ -27,24 +27,12 @@ fn main() {
         .build()
         .expect("Couldn't initialise the window.");
     let window_size: (i32, i32) = (window.size().0 as i32, window.size().1 as i32);
-    let mut canvas: sdl2::render::WindowCanvas = window
-        .clone()
-        .into_canvas()
-        .present_vsync()
-        .build()
-        .expect("Couldn't initialise the canvas.");
     let mut event_pump: sdl2::EventPump = sdl_context
         .event_pump()
         .expect("Couldn't initialise the EventPump.");
 
     // Load the font
     let font_path: &Path = Path::new("res/PixelifySans-Bold.ttf");
-    let mut font: Font = sdl_ttf_context
-        .load_font(font_path, 40)
-        .expect("Couldn't initialise the font.");
-    font.set_style(FontStyle::BOLD);
-    let texture_creator: sdl2::render::TextureCreator<sdl2::video::WindowContext> =
-        canvas.texture_creator();
 
     // Initialise circle
     let mut ball: Ball = Ball {
@@ -57,12 +45,23 @@ fn main() {
     };
     let mut paddle1: Paddle = Paddle::new(10, 200);
     let mut paddle2: Paddle = Paddle::new((window.size().0 - 30) as i32, 200);
-    let mut game: Game = Game::new(5);
+    let mut game: Game = Game::new(
+        5,
+        window
+            .clone()
+            .into_canvas()
+            .present_vsync()
+            .build()
+            .expect("Couldn't initialise the canvas."),
+        sdl_ttf_context
+            .load_font(font_path, 40)
+            .expect("Couldn't initialise the font."),
+    );
 
     'running: loop {
         // Reset the canvas
-        canvas.set_draw_color(Color::BLACK);
-        canvas.clear();
+        game.canvas.set_draw_color(Color::BLACK);
+        game.canvas.clear();
 
         // Handle events
         for event in event_pump.poll_iter() {
@@ -100,9 +99,7 @@ fn main() {
             ball.check_colliding([&paddle1, &paddle2], &mut game, &window);
             ball.update();
         }
-        
-        game.render(
-            &mut canvas, &ball, &paddle1, &paddle2, &font, &texture_creator, window_size
-        )
+
+        game.render(&ball, &paddle1, &paddle2, window_size)
     }
 }
