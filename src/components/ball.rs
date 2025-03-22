@@ -13,60 +13,111 @@ pub struct Ball {
     pub y_vel: i32,
     pub r: u32,
     pub color: Color,
+    explode_count: i8,
 }
 
 impl Ball {
-    pub fn draw(&self, canvas: &mut Canvas<Window>) {
+    pub fn new(x: i32, y: i32, r: u32) -> Self {
+        Ball {
+            x,
+            y,
+            r,
+            x_vel: 8,
+            y_vel: 6,
+            color: Color::WHITE,
+            explode_count: -1,
+        }
+    }
+
+    pub fn draw(&mut self, canvas: &mut Canvas<Window>, window_size: (i32, i32)) {
+        self.explode_count = self.explode_count.saturating_sub(1);
         canvas.set_draw_color(self.color);
 
-        let mut x: i32 = 0;
-        let mut y: i32 = self.r as i32;
-        let mut d: i32 = 1 - self.r as i32;
-
-        while x <= y {
-            // Draw 8 octants of the circle for symmetry
-            for &point in &[
-                (self.x + x, self.y + y),
-                (self.x - x, self.y + y),
-                (self.x + x, self.y - y),
-                (self.x - x, self.y - y),
-                (self.x + y, self.y + x),
-                (self.x - y, self.y + x),
-                (self.x + y, self.y - x),
-                (self.x - y, self.y - x),
-            ] {
-                canvas
-                    .fill_rect(Rect::new(point.0, point.1, 1, 1))
-                    .expect("Couldn't draw the ball.");
+        match self.explode_count {
+            0 => {
+                self.x = window_size.0 / 2;
+                self.y = window_size.1 / 2;
             }
+            n if n < 0 => {
+                let mut x: i32 = 0;
+                let mut y: i32 = self.r as i32;
+                let mut d: i32 = 1 - self.r as i32;
 
-            // Update Bresenham algorithm values
-            x += 1;
-            if d < 0 {
-                d += 2 * x + 1;
-            } else {
-                y -= 1;
-                d += 2 * (x - y) + 1;
+                while x <= y {
+                    // Draw 8 octants of the circle for symmetry
+                    for &point in &[
+                        (self.x + x, self.y + y),
+                        (self.x - x, self.y + y),
+                        (self.x + x, self.y - y),
+                        (self.x - x, self.y - y),
+                        (self.x + y, self.y + x),
+                        (self.x - y, self.y + x),
+                        (self.x + y, self.y - x),
+                        (self.x - y, self.y - x),
+                    ] {
+                        canvas
+                            .fill_rect(Rect::new(point.0, point.1, 1, 1))
+                            .expect("Couldn't draw the ball.");
+                    }
+
+                    // Update Bresenham algorithm values
+                    x += 1;
+                    if d < 0 {
+                        d += 2 * x + 1;
+                    } else {
+                        y -= 1;
+                        d += 2 * (x - y) + 1;
+                    }
+                }
+            }
+            _ => {
+                let r: i32 = self.r as i32 + (self.explode_count as i32 % 50);
+                let y: i32 = self.y;
+                let x: i32 = self.x;
+                for point in [
+                    (x, y - r),
+                    (
+                        x + ((2.0_f32).sqrt() * r as f32 / 2.0) as i32,
+                        y - ((2.0_f32).sqrt() * r as f32 / 2.0) as i32,
+                    ),
+                    (x + r, y),
+                    (
+                        x + ((2.0_f32).sqrt() * r as f32 / 2.0) as i32,
+                        y + ((2.0_f32).sqrt() * r as f32 / 2.0) as i32,
+                    ),
+                    (x, y + r),
+                    (
+                        x - ((2.0_f32).sqrt() * r as f32 / 2.0) as i32,
+                        y - ((2.0_f32).sqrt() * r as f32 / 2.0) as i32,
+                    ),
+                    (x - r, y),
+                    (
+                        x - ((2.0_f32).sqrt() * r as f32 / 2.0) as i32,
+                        y + ((2.0_f32).sqrt() * r as f32 / 2.0) as i32,
+                    ),
+                ] {
+                    canvas.fill_rect(Rect::new(point.0, point.1, 3, 3)).expect("Couldn't draw exploding part.");
+                }
             }
         }
     }
 
     pub fn check_colliding(&mut self, paddles: [&Paddle; 2], game: &mut Game, window: &Window) {
+        if self.explode_count > 0 {
+            return;
+        }
+
         let (width, height) = window.size();
 
         // Left and right wall collisions
-        if (self.x + self.r as i32) <= 0 {
+        if (self.x - self.r as i32) <= 0 {
             self.x_vel *= -1;
             self.y_vel = 5;
-            self.x = width as i32 / 2;
-            self.y = height as i32 / 2;
-            game.increase_score(Paddles::Paddle2);
-        } else if (self.x + self.r as i32) > width as i32 {
+            game.increase_score(Paddles::Paddle2, self);
+        } else if (self.x + self.r as i32) >= width as i32 {
             self.x_vel *= -1;
             self.y_vel = 3;
-            self.x = width as i32 / 2;
-            self.y = height as i32 / 2;
-            game.increase_score(Paddles::Paddle1);
+            game.increase_score(Paddles::Paddle1, self);
         }
         // Top and bottom wall collisions
         if (self.y < 0) || (self.y + self.r as i32 > height as i32) {
@@ -96,7 +147,13 @@ impl Ball {
     }
 
     pub fn update_movement(&mut self) {
-        self.x += self.x_vel;
-        self.y += self.y_vel;
+        if self.explode_count <= 0 {
+            self.x += self.x_vel;
+            self.y += self.y_vel;
+        }
+    }
+
+    pub fn explode(&mut self) {
+        self.explode_count = 50;
     }
 }

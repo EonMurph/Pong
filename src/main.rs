@@ -1,6 +1,7 @@
 mod components;
 
 use std::path::Path;
+use std::time::SystemTime;
 
 use components::ball::Ball;
 use components::game::Game;
@@ -35,14 +36,7 @@ fn main() {
     let font_path: &Path = Path::new("res/PixelifySans-Bold.ttf");
 
     // Initialise the ball, paddles, and game structs
-    let mut ball: Ball = Ball {
-        x: 30,
-        y: 100,
-        x_vel: 8,
-        y_vel: 6,
-        r: 12,
-        color: Color::WHITE,
-    };
+    let mut ball: Ball = Ball::new(30, 100, 12);
     let mut paddle1: Paddle = Paddle::new(10, 200);
     let mut paddle2: Paddle = Paddle::new((window.size().0 - 30) as i32, 200);
     let mut game: Game = Game::new(
@@ -59,6 +53,7 @@ fn main() {
     );
 
     'running: loop {
+        let loop_start_time: SystemTime = SystemTime::now();
         // Reset the canvas
         game.canvas.set_draw_color(Color::BLACK);
         game.canvas.clear();
@@ -102,6 +97,13 @@ fn main() {
         }
 
         // Render the game
-        game.render(&ball, &paddle1, &paddle2, window_size)
+        game.render(&mut ball, &paddle1, &paddle2, window_size);
+        let loop_duration: u128 = SystemTime::now()
+            .duration_since(loop_start_time)
+            .expect("Couldn't get time difference.")
+            .as_micros();
+        std::thread::sleep(std::time::Duration::from_micros(
+            ((1000000 / 60) as u64).saturating_sub(loop_duration as u64),
+        ));
     }
 }

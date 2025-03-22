@@ -31,7 +31,8 @@ impl<'a, 'b> Game<'a, 'b> {
         }
     }
 
-    pub fn increase_score(&mut self, paddle: Paddles) {
+    pub fn increase_score(&mut self, paddle: Paddles, ball: &mut Ball) {
+        ball.explode();
         match paddle {
             Paddles::Paddle1 => {
                 self.p1_score += 1;
@@ -73,7 +74,7 @@ impl<'a, 'b> Game<'a, 'b> {
 
     pub fn render(
         &mut self,
-        ball: &Ball,
+        ball: &mut Ball,
         paddle1: &Paddle,
         paddle2: &Paddle,
         window_size: (i32, i32),
@@ -93,7 +94,7 @@ impl<'a, 'b> Game<'a, 'b> {
                 (game_over_font_size.0, game_over_font_size.1),
             );
         } else {
-            ball.draw(&mut self.canvas);
+            ball.draw(&mut self.canvas, window_size);
             paddle1.draw(&mut self.canvas);
             paddle2.draw(&mut self.canvas);
 
