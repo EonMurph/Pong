@@ -71,7 +71,7 @@ impl Ball {
                 }
             }
             _ => {
-                let r: i32 = self.r as i32 + (self.explode_count as i32 % 50);
+                let r: i32 = self.r as i32 + (60 / (self.explode_count as i32));
                 let y: i32 = self.y;
                 let x: i32 = self.x;
                 for point in [
@@ -96,7 +96,9 @@ impl Ball {
                         y + ((2.0_f32).sqrt() * r as f32 / 2.0) as i32,
                     ),
                 ] {
-                    canvas.fill_rect(Rect::new(point.0, point.1, 3, 3)).expect("Couldn't draw exploding part.");
+                    canvas
+                        .fill_rect(Rect::new(point.0, point.1, 3, 3))
+                        .expect("Couldn't draw exploding part.");
                 }
             }
         }
@@ -154,6 +156,6 @@ impl Ball {
     }
 
     pub fn explode(&mut self) {
-        self.explode_count = 50;
+        self.explode_count = 60;
     }
 }
